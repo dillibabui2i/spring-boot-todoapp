@@ -33,16 +33,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="tasklist : ${tasklist}" th:class="${task.complete} ? success : warning">
+        <tr th:each="task : ${tasklist}" th:class="${task.completed} ? 'success' : 'warning'">
             <td>
                 <div class="btn btn-group-sm" role="group">
-                    <a class="btn btn-info" th:href="@{/edit/{id}(id=${tasklist.id})}">Edit</a>
-                    <a class="btn btn-danger" th:href="@{/delete/{id}(id=${tasklist.id})}">Delete</a>
+                    <a class="btn btn-info" th:href="@{/edit/{id}(id=${task.id})}">Edit</a>
+                    <a class="btn btn-danger" th:href="@{/delete/{id}(id=${task.id})}">Delete</a>
                 </div>
             </td>
-            <td th:text="${tasklist.id}">1</td>
-            <td th:text="${tasklist.description}">Finish the assesment</td>
-            <td th:text="${tasklist.complete}">true</td>
+            <td th:text="${task.id}">1</td>
+            <td th:text="${task.description}">Finish the assesment</td>
+            <td th:text="${task.completed}">true</td>
 
         </tr>
         </tbody>
