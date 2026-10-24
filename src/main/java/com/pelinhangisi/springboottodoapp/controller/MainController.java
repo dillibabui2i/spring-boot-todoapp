@@ -1,12 +1,28 @@
 package com.pelinhangisi.springboottodoapp.controller;
 
+import com.pelinhangisi.springboottodoapp.dao.TodoItemRepository;
+import com.pelinhangisi.springboottodoapp.dao.UserRepository;
+import com.pelinhangisi.springboottodoapp.models.TodoItem;
+import com.pelinhangisi.springboottodoapp.models.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 
 
 @Controller
+@RequiredArgsConstructor
 public class MainController {
+
+    private final TodoItemRepository todoItemRepository;
+    private final UserRepository userRepository;
 
     @GetMapping("/login")
     public String login(){
@@ -19,8 +35,34 @@ public class MainController {
     }
 
     @GetMapping("/tasklist")
-    public String tasklist(){
+    public String tasklist(Model model, Authentication authentication){
+        User user = null;
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
+            user = userRepository.findByEmail(authentication.getName());
+        }
+        model.addAttribute("tasklist", user != null ? user.getTodoItems() : List.of());
         return "tasklist";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editTodoItem(@PathVariable Long id){
+        TodoItem todoItem = todoItemRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        todoItem.setCompleted(!todoItem.getCompleted());
+        todoItemRepository.save(todoItem);
+        return "redirect:/tasklist";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteTodoItem(@PathVariable Long id){
+        TodoItem todoItem = todoItemRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        for (User user : userRepository.findAll()) {
+            if (user.getTodoItems().remove(todoItem)) {
+                userRepository.save(user);
+            }
+        }
+        todoItemRepository.delete(todoItem);
+        return "redirect:/tasklist";
     }
 
 }
