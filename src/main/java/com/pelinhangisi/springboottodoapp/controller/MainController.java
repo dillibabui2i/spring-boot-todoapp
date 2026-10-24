@@ -5,6 +5,7 @@ import com.pelinhangisi.springboottodoapp.dao.UserRepository;
 import com.pelinhangisi.springboottodoapp.models.TodoItem;
 import com.pelinhangisi.springboottodoapp.models.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -46,7 +47,8 @@ public class MainController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editTodoItem(@PathVariable Long id){
+    public String editTodoItem(@PathVariable Long id, Authentication authentication){
+        requireOwnsTodoItem(id, authentication);
         TodoItem todoItem = todoItemRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         todoItem.setCompleted(!todoItem.getCompleted());
         todoItemRepository.save(todoItem);
@@ -54,7 +56,8 @@ public class MainController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteTodoItem(@PathVariable Long id){
+    public String deleteTodoItem(@PathVariable Long id, Authentication authentication){
+        requireOwnsTodoItem(id, authentication);
         TodoItem todoItem = todoItemRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         for (User user : userRepository.findAll()) {
             if (user.getTodoItems().remove(todoItem)) {
@@ -63,6 +66,17 @@ public class MainController {
         }
         todoItemRepository.delete(todoItem);
         return "redirect:/tasklist";
+    }
+
+    private void requireOwnsTodoItem(Long todoItemId, Authentication authentication){
+        User currentUser = userRepository.findByEmail(authentication.getName());
+        if (currentUser == null) {
+            throw new NoSuchElementException();
+        }
+        User owner = userRepository.findByTodoItemsId(todoItemId).orElseThrow(() -> new NoSuchElementException());
+        if (!owner.getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Cannot access another user's todo item");
+        }
     }
 
 }
