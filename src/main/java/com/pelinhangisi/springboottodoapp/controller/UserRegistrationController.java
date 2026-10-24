@@ -1,6 +1,7 @@
 package com.pelinhangisi.springboottodoapp.controller;
 
 
+import com.pelinhangisi.springboottodoapp.exception.EmailAlreadyExistsException;
 import com.pelinhangisi.springboottodoapp.request.UserRegistrationRequest;
 import com.pelinhangisi.springboottodoapp.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,11 @@ public class UserRegistrationController {
 
     @PostMapping
     public String registerUser(@ModelAttribute("user") UserRegistrationRequest userRegistrationRequest){
-        userService.save(userRegistrationRequest);
+        try {
+            userService.save(userRegistrationRequest);
+        } catch (EmailAlreadyExistsException e) {
+            return "redirect:/registration?error";
+        }
         return "redirect:/registration?success";
     }
 }

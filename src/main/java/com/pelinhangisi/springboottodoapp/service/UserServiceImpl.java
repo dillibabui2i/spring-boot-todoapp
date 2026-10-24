@@ -1,10 +1,12 @@
 package com.pelinhangisi.springboottodoapp.service;
 
 import com.pelinhangisi.springboottodoapp.dao.UserRepository;
+import com.pelinhangisi.springboottodoapp.exception.EmailAlreadyExistsException;
 import com.pelinhangisi.springboottodoapp.models.Role;
 import com.pelinhangisi.springboottodoapp.models.User;
 import com.pelinhangisi.springboottodoapp.request.UserRegistrationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +35,11 @@ public class UserServiceImpl implements UserService{
         user.setEmail(userRegistrationRequest.getEmail());
         user.setPassword(passwordEncoder.encode(userRegistrationRequest.getPassword()));
         user.setRoles(Arrays.asList(new Role("ROLE_USER")));
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailAlreadyExistsException("Email already registered: " + user.getEmail());
+        }
     }
 
     @Override
