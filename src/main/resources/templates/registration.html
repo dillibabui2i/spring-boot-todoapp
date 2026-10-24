@@ -28,6 +28,11 @@
           <div class="alert alert-info">You've successfully registered to todo app!</div>
         </div>
 
+      <!-- error message -->
+        <div th:if="${param.error}">
+          <div class="alert alert-danger">This email is already registered. Please use a different email or log in.</div>
+        </div>
+
        <h1>Registration</h1>
 
       <form th:action="@{/registration}" method="post" th:object="${user}">
