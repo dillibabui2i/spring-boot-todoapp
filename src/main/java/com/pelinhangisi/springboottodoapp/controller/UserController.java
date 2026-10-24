@@ -6,8 +6,13 @@ import com.pelinhangisi.springboottodoapp.models.TodoItem;
 import com.pelinhangisi.springboottodoapp.models.User;
 import com.pelinhangisi.springboottodoapp.request.AddTodoItemRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -24,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/todos")
-    public void addTodoItem(@PathVariable Long userId, @RequestBody AddTodoItemRequest todoItemRequest){
+    public void addTodoItem(@PathVariable Long userId, @Valid @RequestBody AddTodoItemRequest todoItemRequest){
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
         TodoItem todoItem = new TodoItem();
         todoItem.setDescription(todoItemRequest.getDescription());
@@ -52,6 +57,13 @@ public class UserController {
     public void deleteUser(@PathVariable Long userId){
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
         userRepository.delete(user);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException e){
+        FieldError fieldError = e.getBindingResult().getFieldError();
+        String message = fieldError != null ? fieldError.getDefaultMessage() : "Invalid request";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 
 }

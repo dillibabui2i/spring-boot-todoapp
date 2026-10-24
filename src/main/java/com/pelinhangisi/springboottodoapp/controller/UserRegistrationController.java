@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/registration")
@@ -24,7 +27,11 @@ public class UserRegistrationController {
     }
 
     @PostMapping
-    public String registerUser(@ModelAttribute("user") UserRegistrationRequest userRegistrationRequest){
+    public String registerUser(@Valid @ModelAttribute("user") UserRegistrationRequest userRegistrationRequest,
+                                BindingResult bindingResult){
+        if (bindingResult.hasErrors()) {
+            return "registration";
+        }
         try {
             userService.save(userRegistrationRequest);
         } catch (EmailAlreadyExistsException e) {
