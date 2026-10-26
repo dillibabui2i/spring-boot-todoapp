@@ -55,6 +55,18 @@ class MainControllerTest {
     }
 
     @Test
+    void addTodoItem_createsTodoItemForCurrentUser_andRedirects() {
+        User userA = userA();
+        authenticateAs(userA);
+
+        String view = mainController.addTodoItem("Buy milk", authentication);
+
+        assertThat(userA.getTodoItems()).hasSize(1);
+        assertThat(userA.getTodoItems().get(0).getDescription()).isEqualTo("Buy milk");
+        assertThat(view).isEqualTo("redirect:/tasklist");
+    }
+
+    @Test
     void editTodoItem_ownTodoItem_toggles() {
         User userA = userA();
         authenticateAs(userA);
