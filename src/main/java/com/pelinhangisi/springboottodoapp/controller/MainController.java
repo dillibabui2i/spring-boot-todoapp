@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -44,6 +46,17 @@ public class MainController {
         }
         model.addAttribute("tasklist", user != null ? user.getTodoItems() : List.of());
         return "tasklist";
+    }
+
+    @PostMapping("/add")
+    public String addTodoItem(@RequestParam String description, Authentication authentication){
+        User user = userRepository.findByEmail(authentication.getName());
+        TodoItem todoItem = new TodoItem();
+        todoItem.setDescription(description);
+        todoItemRepository.save(todoItem);
+        user.getTodoItems().add(todoItem);
+        userRepository.save(user);
+        return "redirect:/tasklist";
     }
 
     @GetMapping("/edit/{id}")

@@ -22,6 +22,14 @@
     <div class="row">
         <h1>Todo-List</h1>
     </div>
+    <form method="post" th:action="@{/add}" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="text" name="description" class="form-control" placeholder="New todo description" required>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Add Todo</button>
+        </div>
+    </form>
     <table class="table table-bordered table-striped">
         <thead>
         <tr>
