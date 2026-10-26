@@ -52,6 +52,7 @@ public class UserController {
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException());
         TodoItem todoItem = todoItemRepository.findById(todoItemId).orElseThrow(() -> new NoSuchElementException());
         user.getTodoItems().remove(todoItem);
+        userRepository.save(user);
         todoItemRepository.delete(todoItem);
     }
 
