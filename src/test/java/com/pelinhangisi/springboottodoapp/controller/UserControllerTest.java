@@ -125,7 +125,10 @@ class UserControllerTest {
         User userA = userA();
         TodoItem todoItem = new TodoItem();
         todoItem.setId(10L);
+        TodoItem otherTodoItem = new TodoItem();
+        otherTodoItem.setId(11L);
         userA.getTodoItems().add(todoItem);
+        userA.getTodoItems().add(otherTodoItem);
         authenticateAs(userA);
         when(userRepository.findById(1L)).thenReturn(Optional.of(userA));
         when(userRepository.findByTodoItemsId(10L)).thenReturn(Optional.of(userA));
@@ -133,7 +136,9 @@ class UserControllerTest {
 
         userController.deleteTodo(1L, 10L, authentication);
 
-        assertThat(userA.getTodoItems()).isEmpty();
+        assertThat(userA.getTodoItems()).containsExactly(otherTodoItem);
+        org.mockito.Mockito.verify(userRepository).save(userA);
+        org.mockito.Mockito.verify(todoItemRepository).delete(todoItem);
     }
 
     @Test
